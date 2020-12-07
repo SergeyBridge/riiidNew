@@ -1,0 +1,9 @@
+jupyterlab
+tqdm
+matplotlib
+datatable
+dask
+plotly
+seaborn
+lightgbm
+torch
