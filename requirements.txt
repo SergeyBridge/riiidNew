@@ -1,9 +1,15 @@
-jupyterlab
-tqdm
+wheel
+pandas
+# pyarrow
+numpy
+# jupyterlab
+tqdm==4.53
 matplotlib
-datatable
+# datatable
 dask
 plotly
 seaborn
 lightgbm
-torch
+catboost
+torch==1.6.0
+Pillow==6.2.2
