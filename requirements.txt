@@ -5,12 +5,12 @@ numpy
 # jupyterlab
 tqdm==4.53
 matplotlib
-# datatable
+datatable
 dask
 plotly
 seaborn
 lightgbm
 catboost
-torch==1.6.0
-Pillow==6.2.2
+# torch==1.6.0
+# Pillow==6.2.2
 wget
