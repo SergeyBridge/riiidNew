@@ -35,10 +35,8 @@ def bayesian_catboost_search(train_set, val_set, prior_params, pds, pds_dtypes,
                              init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
         params = prior_params.copy()
-
         dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-
-
+        # dict_ = {key: dtype_(val) for key, (val, dtype_) in dict_.items()}
         params.update(dict_)
 
         # Model definition
@@ -57,3 +55,4 @@ def bayesian_catboost_search(train_set, val_set, prior_params, pds, pds_dtypes,
 #                                         prior_params=prior_params, pds=pds,
 #                                         init_points=5, n_iter=7)
 # optimzer_max
+
