@@ -2,8 +2,13 @@
 
 import pandas as pd
 import catboost
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, cv
 from torch import cuda
+
+import numpy as np
+import scipy
+from bayes_opt import BayesianOptimization
+
 
 
 def preprocess_train_data(df, questions_df, target, dtypes):
@@ -44,3 +49,24 @@ def preprocess_train_data(df, questions_df, target, dtypes):
 
     return user_agg, content_agg, df
 
+
+
+def search_cv(train_set, prior_params, pds, pds_dtypes,init_points=3, n_iter=7, verbose=0):
+
+    def catboost_hyperparams(**dict_):
+        params = prior_params.copy()
+        dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
+        params.update(dict_)
+
+        # Fitting
+        scores = cv(train_set, params,
+                    plot=False,
+                    # metric_period=10,
+                    type='TimeSeries',
+                    fold_count=3)
+
+        return np.max(scores["test-AUC-mean"])
+
+    optimizer = BayesianOptimization(catboost_hyperparams, pds, random_state=0, verbose=verbose)
+    optimizer.maximize(init_points, n_iter)
+    return optimizer.max

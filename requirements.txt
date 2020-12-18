@@ -1,9 +1,9 @@
 wheel
 pandas
 pyarrow
-# numpy
+numpy
 scipy  --ignore-installed
-# jupyterlab
+jupyterlab
 tqdm==4.53
 matplotlib
 datatable
