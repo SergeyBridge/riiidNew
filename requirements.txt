@@ -1,7 +1,8 @@
 wheel
 pandas
-# pyarrow
-numpy
+pyarrow
+# numpy
+scipy  --ignore-installed
 # jupyterlab
 tqdm==4.53
 matplotlib
@@ -13,4 +14,9 @@ lightgbm
 catboost
 torch==1.6.0
 Pillow==6.2.2
-wget
+bayesian-optimization
+
+# for requests module
+idna==2.5
+urllib3==1.20
+requests==2.25.0
