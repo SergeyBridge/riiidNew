@@ -3,22 +3,29 @@ import scipy
 from bayes_opt import BayesianOptimization
 from catboost import CatBoostClassifier, cv
 
+def param_adjust_dtypes(prior_params, pds_dtypes, pds_sample):
+        params = prior_params.copy()
+        pds_correct_dtyped = {key: pds_dtypes[key](val) for key, val in pds_sample.items()}
+        params.update(pds_correct_dtyped)
+        
+        return params
+
+
 
 def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
                                init_points=3, n_iter=7, verbose=0):
-
     def catboost_hyperparams(**dict_):
-        params = prior_params.copy()
-        dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-        params.update(dict_)
+        params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
+#         prior_params.copy()
+#         dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
+#         params.update(dict_)
 
         # Fitting
         scores = cv(train_set, params,
                     plot=False,
-                    # metric_period=10,
                     type='TimeSeries',
                     fold_count=3)
-
+        
         return np.max(scores["test-AUC-mean"])
 
     optimizer = BayesianOptimization(catboost_hyperparams, pds, random_state=0, verbose=verbose)
@@ -35,9 +42,11 @@ def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
 def bayesian_catboost_search(train_set, val_set, prior_params, pds, pds_dtypes,
                              init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
-        params = prior_params.copy()
-        dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-        params.update(dict_)
+        params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
+
+#         params = prior_params.copy()
+#         dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
+#         params.update(dict_)
 
         # Model definition
         model = CatBoostClassifier(**params)
