@@ -16,10 +16,6 @@ def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
                                init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
         params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
-#         prior_params.copy()
-#         dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-#         params.update(dict_)
-
         # Fitting
         scores = cv(train_set, params,
                     plot=False,
@@ -33,7 +29,7 @@ def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
     return optimizer.max
 
 
-# USE WITH
+# USAGE example
 # print("optimizer_maxCV")
 # optimizer_maxCV = bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
 #                                               init_points=3, n_iter=7, verbose=0)
@@ -43,14 +39,8 @@ def bayesian_catboost_search(train_set, val_set, prior_params, pds, pds_dtypes,
                              init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
         params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
-
-#         params = prior_params.copy()
-#         dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-#         params.update(dict_)
-
         # Model definition
         model = CatBoostClassifier(**params)
-
         # Fitting
         model.fit(train_set, eval_set=val_set, use_best_model=True)
 
