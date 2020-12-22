@@ -41,7 +41,7 @@ prior_params = {
     # 'task_type': 'GPU' if torch.cuda.is_available() else 'CPU',
     'grow_policy': 'Lossguide',
     'iterations': 5000,
-    'learning_rate': 3e-2,
+    'learning_rate': 0.1,  # 3e-2,
     'random_seed': 0,
     'bootstrap_type': 'Bayesian',
     'l2_leaf_reg': 5e-1,

@@ -12,7 +12,8 @@ def param_adjust_dtypes(prior_params, pds_dtypes, pds_sample):
 
 
 
-def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
+def bayesian_catboost_searchCV(train_set, 
+                               prior_params, pds, pds_dtypes,
                                init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
         params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
@@ -35,7 +36,8 @@ def bayesian_catboost_searchCV(train_set, prior_params, pds, pds_dtypes,
 #                                               init_points=3, n_iter=7, verbose=0)
 # optimizer_maxCV
 
-def bayesian_catboost_search(train_set, val_set, prior_params, pds, pds_dtypes,
+def bayesian_catboost_search(train_set, val_set, 
+                             prior_params, pds, pds_dtypes,
                              init_points=3, n_iter=7, verbose=0):
     def catboost_hyperparams(**dict_):
         params = param_adjust_dtypes(prior_params, pds_dtypes, dict_)
