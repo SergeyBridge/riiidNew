@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+from catboost.utils import get_gpu_device_count
 
 dtypes = {
     'row_id': 'int64',
@@ -35,10 +36,11 @@ prior_params = {
     'eval_metric': 'AUC',
     'custom_metric': 'AUC:hints=skip_train~false',
 
-    'task_type': 'GPU' if str(homedir) == "/root" else 'CPU',
+    #'task_type': 'GPU' if str(homedir) == "/root" else 'CPU',
+    'task_type': 'GPU' if get_gpu_device_count() > 0 else 'CPU',
     # 'task_type': 'GPU' if torch.cuda.is_available() else 'CPU',
     'grow_policy': 'Lossguide',
-    'iterations': 2000,
+    'iterations': 5000,
     'learning_rate': 3e-2,
     'random_seed': 0,
     'bootstrap_type': 'Bayesian',

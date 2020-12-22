@@ -3,7 +3,7 @@
 import pandas as pd
 import catboost
 from catboost import CatBoostClassifier, cv
-from torch import cuda
+# from torch import cuda
 
 import numpy as np
 import scipy
