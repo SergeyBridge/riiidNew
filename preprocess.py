@@ -37,9 +37,11 @@ def preprocess_train_data(df, questions_df, target, dtypes):
     content_agg = df.groupby('content_id')[target].agg(['sum', 'count'])
 
     # Take only 24 last observations of each user
-    df = df.groupby('user_id').tail(24).reset_index(drop=True)
+    # df = df.groupby('user_id').tail(24).reset_index(drop=True)
 
-    df = pd.merge(df, questions_df, left_on='content_id', right_on='question_id', how='left')
+    df = pd.concat([df.reset_index(drop=True), questions_df.reindex(df['user_id'].values).reset_index(drop=True)],
+              axis=1)
+    # df = pd.merge(df, questions_df, left_on='content_id', right_on='question_id', how='left')
     df.drop(columns=['question_id'], inplace=True)
 
     # How many questions have been answered in each content ID?
