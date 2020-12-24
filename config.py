@@ -55,10 +55,10 @@ prior_params = {
 
 # catboost params intervals for bayesian search
 pds = {
-    'l2_leaf_reg': [2e-1, 5e2],
+    'l2_leaf_reg': [2e-2, 5e2],
     'bagging_temperature': [0.3, 5],
     'depth': [8, 25],
-    'max_leaves': [10, 150],
+    'max_leaves': [8, 150],
     'border_count': [50, 300],
 
 }
