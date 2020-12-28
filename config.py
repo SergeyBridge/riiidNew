@@ -57,7 +57,7 @@ prior_params = {
     'learning_rate': 0.1,  # 3e-2,
     'random_seed': 0,
     'bootstrap_type': 'Bayesian',
-    'l2_leaf_reg': 5e-1,
+    'l2_leaf_reg': 1e-1,
     'depth': 10,
     'max_leaves': 10,
     'border_count': 128,
