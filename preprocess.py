@@ -1,5 +1,6 @@
 #%%
 
+import numpy as np
 import pandas as pd
 import catboost
 from catboost import CatBoostClassifier, cv
@@ -9,11 +10,26 @@ import numpy as np
 import scipy
 from bayes_opt import BayesianOptimization
 
-
+concat_dtypes = {
+    'row_id': np.int64,
+    'timestamp': np.int64,
+    'user_id':  np.int32,
+    'content_id': np.int16,
+    'content_type_id': np.int8,
+    'task_container_id': np.int16,
+    'answered_correctly': np.int8,
+    'prior_question_elapsed_time': np.float32,
+    'prior_question_had_explanation': np.bool_,
+    'user_answer': np.int8,
+    'user_correctness': np.float64,
+    'question_id': np.int64,
+    'part': np.int64,
+}
 
 def preprocess_train_data(df, questions_df, target, dtypes):
     # Exclude lectures
-    df = df[df[target] != -1].reset_index(drop=True, inplace=False)
+    df = df[df['content_type_id'] == 0].reset_index(drop=True, inplace=False)
+
     # Fill NaN values in the 'prior_question_had_explanation' columns
     df['prior_question_had_explanation'].fillna(False, inplace=True)
     # Set type
@@ -21,7 +37,8 @@ def preprocess_train_data(df, questions_df, target, dtypes):
 
     # Answer for the previous questions of users
     df['lag'] = df.groupby('user_id')[target].shift()
-    # For each user (groupby('user_id')), compute the cummulative number of correct answers and number answers in general
+
+    # compute the cummulative number of correct answers and number answers in general
     groupby = df.groupby('user_id')['lag']
     cum = groupby.agg(['cumsum', 'cumcount'])
 
@@ -29,7 +46,6 @@ def preprocess_train_data(df, questions_df, target, dtypes):
     df['user_correctness'] = cum['cumsum'] / cum['cumcount']
     # Drop the 'lag' feature
     df.drop(columns=['lag'], inplace=True)
-    df.head()
 
     # Overall correctness of users
     user_agg = df.groupby('user_id')[target].agg(['sum', 'count'])
@@ -38,37 +54,24 @@ def preprocess_train_data(df, questions_df, target, dtypes):
 
     # Take only 24 last observations of each user
     # df = df.groupby('user_id').tail(24).reset_index(drop=True)
+    df = pd.concat(
+        [df.reset_index(drop=True),
+         questions_df.reindex(df['content_id'].values).reset_index(drop=True)],
+         axis=1, sort=False, join="inner")
 
-    df = pd.concat([df.reset_index(drop=True), questions_df.reindex(df['user_id'].values).reset_index(drop=True)],
-              axis=1)
-    # df = pd.merge(df, questions_df, left_on='content_id', right_on='question_id', how='left')
+    # df_merge = pd.merge(df, questions_df, left_on='content_id', right_on='question_id', how='left')
     df.drop(columns=['question_id'], inplace=True)
 
     # How many questions have been answered in each content ID?
     df['content_count'] = df['content_id'].map(content_agg['count']).astype('int32')
     # How hard are questions in each content ID?
-    df['content_id'] = df['content_id'].map(content_agg['sum'] / content_agg['count'])
+    # df['content_id'] = df['content_id'].map(content_agg['sum'] / content_agg['count'])
+    df.prior_question_elapsed_time = df.prior_question_elapsed_time // 2000
+    df['question_difficulty'] = df.content_id.map(content_agg['sum'] / content_agg['count'])
 
     return user_agg, content_agg, df
 
 
-
-def search_cv(train_set, prior_params, pds, pds_dtypes,init_points=3, n_iter=7, verbose=0):
-
-    def catboost_hyperparams(**dict_):
-        params = prior_params.copy()
-        dict_ = {key: pds_dtypes[key](val) for key, val in dict_.items()}
-        params.update(dict_)
-
-        # Fitting
-        scores = cv(train_set, params,
-                    plot=False,
-                    # metric_period=10,
-                    type='TimeSeries',
-                    fold_count=3)
-
-        return np.max(scores["test-AUC-mean"])
-
-    optimizer = BayesianOptimization(catboost_hyperparams, pds, random_state=0, verbose=verbose)
-    optimizer.maximize(init_points, n_iter)
-    return optimizer.max
+def divide_nan(numerator, denominator):
+    return float(np.divide(numerator, denominator,
+                 out=np.array(np.nan), where=denominator!=0))

@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 import sys
 from catboost.utils import get_gpu_device_count
 
@@ -19,16 +20,27 @@ target = 'answered_correctly'
 
 homedir = Path.home()
 
-features = [
-    'content_id', 'prior_question_elapsed_time',
-    'prior_question_had_explanation', 'user_correctness',
-    'part', 'content_count'
-]
+new_features = {
+    'question_difficulty': np.float,
+    'user_correctness': np.float32,
+    'content_count': np.int32
 
-cat_features = [
-    'prior_question_had_explanation',
-    'part'
-]
+}
+
+features = {
+    'content_id': np.int32,
+    'prior_question_elapsed_time': np.int32,
+    'prior_question_had_explanation': np.bool,
+    'part': np.int32,
+}
+features.update(new_features)
+
+cat_features = {
+    'prior_question_had_explanation': np.bool,
+    'part': np.int,
+}
+
+
 
 # Catboost initial parameters, to overload next by pds for bayesian search
 prior_params = {
@@ -37,10 +49,11 @@ prior_params = {
     'custom_metric': 'AUC:hints=skip_train~false',
 
     #'task_type': 'GPU' if str(homedir) == "/root" else 'CPU',
-    'task_type': 'GPU' if get_gpu_device_count() > 0 else 'CPU',
+    'task_type': 'GPU' if str(Path.home()) == "/home/riiid" else 'CPU',  # if virtual machine then GPU
     # 'task_type': 'GPU' if torch.cuda.is_available() else 'CPU',
     'grow_policy': 'Lossguide',
-    'iterations': 5000,
+    'iterations': 2,
+    'thread_count': -1,
     'learning_rate': 0.1,  # 3e-2,
     'random_seed': 0,
     'bootstrap_type': 'Bayesian',
